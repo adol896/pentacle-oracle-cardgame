@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pentacle Oracle TCG - Audio & Title Edition</title>
+    <title>Pentacle Oracle TCG - Fixed Edition</title>
     <style>
         :root {
             --gold: #d4af37;
@@ -16,6 +16,7 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
         body { margin: 0; background: #05040a; color: #fcf6ba; font-family: 'Georgia', 'Yu Mincho', serif; height: 100vh; overflow: hidden; }
 
+        /* ナビゲーションバー */
         .top-nav-bar {
             position: fixed; top: 12px; right: 12px; z-index: 10005;
             display: flex; gap: 8px; align-items: center;
@@ -29,20 +30,21 @@
         }
         .nav-btn:hover { background: var(--gold); color: #000; transform: translateY(-1px); box-shadow: 0 6px 15px rgba(212, 175, 55, 0.4); }
 
+        /* モード選択画面 */
         #mode-select {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: radial-gradient(circle at center, rgba(35,18,55,0.95) 0%, rgba(5,4,10,1) 100%);
             display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10000;
         }
-        .title-logo { text-align: center; margin-bottom: 25px; }
+        .title-logo { text-align: center; margin-bottom: 20px; }
         .title-pentacle { font-size: 2.8rem; color: var(--gold); text-shadow: var(--magical-glow); animation: rotatePentacle 20s linear infinite; }
         @keyframes rotatePentacle { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .select-title { font-size: 2.6rem; color: var(--gold); text-shadow: var(--magical-glow); margin: 5px 0 0; letter-spacing: 3px; line-height: 1.1; }
-        .subtitle { font-size: 0.85rem; color: var(--mana-blue); letter-spacing: 5px; opacity: 0.9; margin-top: 6px; }
+        .select-title { font-size: 2.5rem; color: var(--gold); text-shadow: var(--magical-glow); margin: 5px 0 0; letter-spacing: 3px; line-height: 1.1; }
+        .subtitle { font-size: 0.82rem; color: var(--mana-blue); letter-spacing: 5px; opacity: 0.9; margin-top: 6px; }
 
-        .mode-container { display: flex; flex-direction: column; gap: 12px; }
+        .mode-container { display: flex; flex-direction: column; gap: 10px; }
         .mode-btn {
-            width: 300px; padding: 14px 18px;
+            width: 300px; padding: 12px 18px;
             background: rgba(18, 18, 30, 0.85); border: 2px solid var(--gold); color: var(--gold);
             font-size: 1.05rem; border-radius: 12px; cursor: pointer; transition: all 0.25s ease;
             box-shadow: 0 4px 15px rgba(0,0,0,0.6); display: flex; flex-direction: column; align-items: center;
@@ -51,13 +53,13 @@
         .mode-btn .desc { font-size: 0.75rem; opacity: 0.85; margin-top: 4px; font-family: sans-serif; }
         
         .volume-control-box {
-            margin-top: 18px;
+            margin-top: 16px;
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 6px;
             background: rgba(15, 15, 25, 0.78);
-            padding: 10px 22px;
+            padding: 8px 22px;
             border-radius: 20px;
             border: 1px solid rgba(212, 175, 55, 0.4);
             backdrop-filter: blur(6px);
@@ -91,12 +93,11 @@
             cursor: pointer;
             transition: transform 0.15s ease;
         }
-        .volume-slider::-webkit-slider-thumb:hover {
-            transform: scale(1.25);
-        }
+        .volume-slider::-webkit-slider-thumb:hover { transform: scale(1.25); }
 
-        .title-footer-note { font-size: 0.72rem; color: rgba(255,255,255,0.4); margin-top: 18px; font-family: sans-serif; }
+        .title-footer-note { font-size: 0.72rem; color: rgba(255,255,255,0.4); margin-top: 14px; font-family: sans-serif; }
 
+        /* ゲーム対戦盤面 */
         #table {
             height: 100vh; width: 100vw; display: none; flex-direction: column; justify-content: space-between;
             background: radial-gradient(circle at center, rgba(15, 30, 22, 0.95) 0%, rgba(4,6,10,0.98) 100%);
@@ -159,6 +160,7 @@
         .atk-orb { background: linear-gradient(135deg, #ff416c, #ff4b2b); color: #fff; }
         .hp-orb { background: linear-gradient(135deg, #11998e, #38ef7d); color: #fff; }
         
+        /* HUDの位置調整 */
         .hud { 
             position: absolute; left: 12px; width: 160px; background: rgba(10,12,20,0.88); 
             padding: 8px 10px; border: 1px solid var(--gold); border-radius: 10px; z-index: 1500;
@@ -191,6 +193,7 @@
             font-size: 0.85rem; font-weight: bold; text-shadow: 0 2px 4px #000; letter-spacing: 1px;
         }
 
+        /* モーダルダイアログ */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: rgba(0,0,0,0.85); display: none; flex-direction: column;
@@ -210,6 +213,7 @@
         .modal-btn.cancel { background: transparent; color: var(--gold); border: 1px solid var(--gold); }
         .modal-btn:hover { transform: scale(1.05); }
 
+        /* リザルト画面 */
         #result-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(5, 5, 10, 0.92); display: none;
@@ -240,6 +244,7 @@
     </button>
 </div>
 
+<!-- モード選択・タイトル画面 -->
 <div id="mode-select">
     <div class="title-logo">
         <div class="title-pentacle">⛤</div>
@@ -272,6 +277,7 @@
     <div class="title-footer-note">※ 画面をタップするとBGM/SFXサウンドが開始されます</div>
 </div>
 
+<!-- ゲーム対戦画面 -->
 <div id="table">
     <div id="log-container"></div>
     
@@ -304,6 +310,7 @@
     </div>
 </div>
 
+<!-- タイトルへ戻る確認ダイアログ -->
 <div id="custom-confirm" class="modal-overlay">
     <div class="modal-box">
         <div class="modal-title">対戦を中断して<br>タイトル画面へ戻りますか？</div>
@@ -314,6 +321,7 @@
     </div>
 </div>
 
+<!-- 勝敗結果画面 -->
 <div id="result-overlay">
     <div id="result-text" class="result-title"></div>
     <button class="result-btn" onclick="startGame(currentLevel)">再挑戦</button>
@@ -384,8 +392,6 @@
         initAudioContext();
         bgmStep = 0;
 
-        // タイトルBGM: BPM 90 (16分音符: ~166ms)
-        // バトルBGM:   BPM 138 (16分音符: ~108ms)
         const intervalMs = (mode === 'title') ? 166 : 108;
         bgmTimer = setInterval(playBGMStep, intervalMs);
     }
@@ -401,13 +407,12 @@
         if (!audioEnabled || !audioCtx) return;
 
         if (currentBGMMode === 'title') {
-            /* --- 神秘的で幻想的な タイトルBGM --- */
-            // コード進行: Em -> C -> G -> D (ドリアン/魔法調アルペジオ)
+            /* 神秘的なタイトルBGM (Em -> C -> G -> D) */
             const titleArp = [
-                164.81, 246.94, 329.63, 392.00, // Em (E3, B3, E4, G4)
-                130.81, 196.00, 261.63, 329.63, // C  (C3, G3, C4, E4)
-                196.00, 293.66, 392.00, 493.88, // G  (G3, D4, G4, B4)
-                146.83, 220.00, 293.66, 369.99  // D  (D3, A3, D4, F#4)
+                164.81, 246.94, 329.63, 392.00,
+                130.81, 196.00, 261.63, 329.63,
+                196.00, 293.66, 392.00, 493.88,
+                146.83, 220.00, 293.66, 369.99
             ];
             const noteIndex = bgmStep % titleArp.length;
             const freq = titleArp[noteIndex];
@@ -423,7 +428,6 @@
             osc.connect(gain); gain.connect(bgmGainNode || audioCtx.destination);
             osc.start(); osc.stop(audioCtx.currentTime + 0.36);
 
-            // 8ステップごとの低音神秘ドローン
             if (bgmStep % 8 === 0) {
                 const baseFreq = titleArp[Math.floor((bgmStep % titleArp.length) / 4) * 4] / 2;
                 const bassOsc = audioCtx.createOscillator();
@@ -439,13 +443,12 @@
             }
 
         } else if (currentBGMMode === 'battle') {
-            /* --- 緊迫感あふれる バトルBGM --- */
-            // コード進行: Am -> F -> C -> G
+            /* アップテンポなバトルBGM (Am -> F -> C -> G) */
             const battleArp = [
-                220.00, 329.63, 440.00, 523.25, // Am
-                174.61, 261.63, 349.23, 440.00, // F
-                130.81, 196.00, 261.63, 329.63, // C
-                196.00, 293.66, 392.00, 493.88  // G
+                220.00, 329.63, 440.00, 523.25,
+                174.61, 261.63, 349.23, 440.00,
+                130.81, 196.00, 261.63, 329.63,
+                196.00, 293.66, 392.00, 493.88
             ];
             const noteIndex = bgmStep % battleArp.length;
             const freq = battleArp[noteIndex];
@@ -465,7 +468,6 @@
             osc.connect(filter); filter.connect(gain); gain.connect(bgmGainNode || audioCtx.destination);
             osc.start(); osc.stop(audioCtx.currentTime + 0.15);
 
-            // 16ビート・疾走シンセベースライン
             const baseFreq = battleArp[Math.floor((bgmStep % battleArp.length) / 4) * 4] / 2;
             const bassOsc = audioCtx.createOscillator();
             const bassGain = audioCtx.createGain();
@@ -478,7 +480,6 @@
             bassOsc.connect(bassGain); bassGain.connect(bgmGainNode || audioCtx.destination);
             bassOsc.start(); bassOsc.stop(audioCtx.currentTime + 0.13);
 
-            // 4拍毎のリズムスネア風ノイズ
             if (bgmStep % 4 === 2) {
                 const bufferSize = audioCtx.sampleRate * 0.04;
                 const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
@@ -601,7 +602,7 @@
     function startGame(lv) {
         initAudioContext();
         playClickSound();
-        startBGM('battle'); // 対戦用BGM開始
+        startBGM('battle');
 
         currentLevel = lv;
         gameOver = false; 
@@ -654,7 +655,7 @@
         document.getElementById('quit-to-title-btn').style.display = 'none';
         document.getElementById('custom-confirm').style.display = 'none';
         document.getElementById('mode-select').style.display = 'flex';
-        startBGM('title'); // タイトル用BGMへ復帰
+        startBGM('title');
     }
 
     function startPlayerTurn() {
@@ -821,7 +822,42 @@
         attacker.classList.add('used');
         addLog(`${attacker.dataset.name} のダイレクトアタック！ ${atkVal}ダメージ`, "player");
         clearSelection();
-    /* --- Level 1: 初級AI（ランダムな展開・直接攻撃中心） --- */
+        updateUI();
+    }
+
+    async function startEnemyTurn() {
+        isTurn = false;
+        document.getElementById('turn-btn').innerText = "...";
+        clearSelection();
+
+        eMaxMana = Math.min(eMaxMana + 1, 10);
+        eMana = eMaxMana;
+        
+        document.querySelectorAll('#enemy-field .card').forEach(c => {
+            c.classList.remove('used');
+            c.classList.remove('summoning-sickness');
+        });
+
+        drawCard('enemy-hand', false);
+        updateUI();
+        addLog("敵のターン", "enemy");
+
+        await new Promise(r => setTimeout(r, 600));
+
+        if (currentLevel === 1) {
+            await enemyAI_Level1();
+        } else if (currentLevel === 2) {
+            await enemyAI_Level2();
+        } else {
+            await enemyAI_Level3();
+        }
+
+        if (!gameOver) {
+            startPlayerTurn();
+        }
+    }
+
+    /* Level 1 AI: 味方ミニオンが存在するときはダイレクトアタック不可 */
     async function enemyAI_Level1() {
         const eHand = document.getElementById('enemy-hand');
         if (eHand.children.length > 0 && Math.random() < 0.5) {
@@ -857,7 +893,6 @@
             const playerMinions = Array.from(document.querySelectorAll('#player-field .card'));
 
             if (playerMinions.length > 0) {
-                // 味方ミニオンがいる場合はダイレクトアタック不可。ランダムに味方ミニオンを攻撃
                 const target = playerMinions[Math.floor(Math.random() * playerMinions.length)];
                 playDamageSound();
                 let atkVal = parseInt(attacker.dataset.atk);
@@ -878,7 +913,6 @@
 
                 updateUI();
             } else {
-                // 味方ミニオンが全滅している場合のみダイレクトアタック
                 playDamageSound();
                 const atk = parseInt(attacker.dataset.atk);
                 pHP = Math.max(0, pHP - atk);
@@ -890,7 +924,7 @@
         }
     }
 
-    /* --- Level 2: 中級AI（トレーディング重視・効率配置） --- */
+    /* Level 2 AI: トレーディング重視・味方ミニオンがいる時はミニオン攻撃優先 */
     async function enemyAI_Level2() {
         const eHand = document.getElementById('enemy-hand');
         
@@ -928,11 +962,8 @@
             const playerField = Array.from(document.querySelectorAll('#player-field .card'));
 
             if (playerField.length > 0) {
-                // 優先度1: 一方的に撃破できるターゲット
                 let target = playerField.find(p => parseInt(p.dataset.hp) <= parseInt(attacker.dataset.atk) && parseInt(p.dataset.atk) < parseInt(attacker.dataset.hp));
-                // 優先度2: 相討ちでも撃破できるターゲット
                 if (!target) target = playerField.find(p => parseInt(p.dataset.hp) <= parseInt(attacker.dataset.atk));
-                // 優先度3: ミニオンが存在するなら残るターゲットを攻撃
                 if (!target) target = playerField[0];
 
                 playDamageSound();
@@ -954,7 +985,6 @@
 
                 updateUI();
             } else {
-                // プレイヤーのミニオンがいない時のみダイレクトアタック
                 playDamageSound();
                 const atk = parseInt(attacker.dataset.atk);
                 pHP = Math.max(0, pHP - atk);
@@ -966,7 +996,7 @@
         }
     }
 
-    /* --- Level 3: 上級AI（リーサル計算・戦術的盤面コントロール） --- */
+    /* Level 3 AI: 最適化AI・リーサル判定 & 盤面除去優先 */
     async function enemyAI_Level3() {
         const eHand = document.getElementById('enemy-hand');
         const attackers = Array.from(document.querySelectorAll('#enemy-field .card:not(.used):not(.summoning-sickness)'));
