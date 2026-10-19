@@ -821,41 +821,7 @@
         attacker.classList.add('used');
         addLog(`${attacker.dataset.name} のダイレクトアタック！ ${atkVal}ダメージ`, "player");
         clearSelection();
-        updateUI();
-    }
-
-    async function startEnemyTurn() {
-        isTurn = false;
-        document.getElementById('turn-btn').innerText = "...";
-        clearSelection();
-
-        eMaxMana = Math.min(eMaxMana + 1, 10);
-        eMana = eMaxMana;
-        
-        document.querySelectorAll('#enemy-field .card').forEach(c => {
-            c.classList.remove('used');
-            c.classList.remove('summoning-sickness');
-        });
-
-        drawCard('enemy-hand', false);
-        updateUI();
-        addLog("敵のターン", "enemy");
-
-        await new Promise(r => setTimeout(r, 600));
-
-        if (currentLevel === 1) {
-            await enemyAI_Level1();
-        } else if (currentLevel === 2) {
-            await enemyAI_Level2();
-        } else {
-            await enemyAI_Level3();
-        }
-
-        if (!gameOver) {
-            startPlayerTurn();
-        }
-    }
-
+    /* --- Level 1: 初級AI（ランダムな展開・直接攻撃中心） --- */
     async function enemyAI_Level1() {
         const eHand = document.getElementById('enemy-hand');
         if (eHand.children.length > 0 && Math.random() < 0.5) {
@@ -888,18 +854,46 @@
         const attackers = Array.from(document.querySelectorAll('#enemy-field .card:not(.used):not(.summoning-sickness)'));
         for (let attacker of attackers) {
             if (gameOver) return;
-            playDamageSound();
-            const atk = parseInt(attacker.dataset.atk);
-            pHP = Math.max(0, pHP - atk);
-            attacker.classList.add('used');
-            addLog(`敵の ${attacker.dataset.name} がダイレクトアタック！ ${atk}ダメージ`, "enemy");
-            updateUI();
+            const playerMinions = Array.from(document.querySelectorAll('#player-field .card'));
+
+            if (playerMinions.length > 0) {
+                // 味方ミニオンがいる場合はダイレクトアタック不可。ランダムに味方ミニオンを攻撃
+                const target = playerMinions[Math.floor(Math.random() * playerMinions.length)];
+                playDamageSound();
+                let atkVal = parseInt(attacker.dataset.atk);
+                let defVal = parseInt(target.dataset.atk);
+                let aHp = parseInt(attacker.dataset.hp) - defVal;
+                let tHp = parseInt(target.dataset.hp) - atkVal;
+
+                attacker.dataset.hp = aHp;
+                target.dataset.hp = tHp;
+                attacker.querySelector('.hp-orb').innerText = aHp;
+                target.querySelector('.hp-orb').innerText = tHp;
+                attacker.classList.add('used');
+
+                addLog(`敵の ${attacker.dataset.name} が ${target.dataset.name} に攻撃！`, "enemy");
+
+                if (tHp <= 0) target.remove();
+                if (aHp <= 0) attacker.remove();
+
+                updateUI();
+            } else {
+                // 味方ミニオンが全滅している場合のみダイレクトアタック
+                playDamageSound();
+                const atk = parseInt(attacker.dataset.atk);
+                pHP = Math.max(0, pHP - atk);
+                attacker.classList.add('used');
+                addLog(`敵の ${attacker.dataset.name} がダイレクトアタック！ ${atk}ダメージ`, "enemy");
+                updateUI();
+            }
             await new Promise(r => setTimeout(r, 600));
         }
     }
 
+    /* --- Level 2: 中級AI（トレーディング重視・効率配置） --- */
     async function enemyAI_Level2() {
         const eHand = document.getElementById('enemy-hand');
+        
         if (eMaxMana < 4 && eHand.children.length > 0) {
             eHand.firstElementChild.remove();
             eMaxMana = Math.min(eMaxMana + 1, 10);
@@ -932,11 +926,15 @@
         for (let attacker of attackers) {
             if (gameOver) return;
             const playerField = Array.from(document.querySelectorAll('#player-field .card'));
-            let target = playerField.find(p => parseInt(p.dataset.hp) <= parseInt(attacker.dataset.atk) && parseInt(p.dataset.atk) < parseInt(attacker.dataset.hp));
-            
-            if (!target) target = playerField.find(p => parseInt(p.dataset.hp) <= parseInt(attacker.dataset.atk));
 
-            if (target) {
+            if (playerField.length > 0) {
+                // 優先度1: 一方的に撃破できるターゲット
+                let target = playerField.find(p => parseInt(p.dataset.hp) <= parseInt(attacker.dataset.atk) && parseInt(p.dataset.atk) < parseInt(attacker.dataset.hp));
+                // 優先度2: 相討ちでも撃破できるターゲット
+                if (!target) target = playerField.find(p => parseInt(p.dataset.hp) <= parseInt(attacker.dataset.atk));
+                // 優先度3: ミニオンが存在するなら残るターゲットを攻撃
+                if (!target) target = playerField[0];
+
                 playDamageSound();
                 let atkVal = parseInt(attacker.dataset.atk);
                 let defVal = parseInt(target.dataset.atk);
@@ -956,6 +954,7 @@
 
                 updateUI();
             } else {
+                // プレイヤーのミニオンがいない時のみダイレクトアタック
                 playDamageSound();
                 const atk = parseInt(attacker.dataset.atk);
                 pHP = Math.max(0, pHP - atk);
@@ -967,6 +966,7 @@
         }
     }
 
+    /* --- Level 3: 上級AI（リーサル計算・戦術的盤面コントロール） --- */
     async function enemyAI_Level3() {
         const eHand = document.getElementById('enemy-hand');
         const attackers = Array.from(document.querySelectorAll('#enemy-field .card:not(.used):not(.summoning-sickness)'));
