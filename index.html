@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pentacle Oracle TCG - Audio & Title Edition</title>
+    <style>
+        :root {
+            --gold: #d4af37;
+            --magical-glow: 0 0 15px rgba(212, 175, 55, 0.6);
+            --mana-blue: #00d2ff;
+            --hp-green: #2ecc71;
+            --danger-red: #e74c3c;
+            --card-bg: #12131a;
+        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
+        body { margin: 0; background: #05040a; color: #fcf6ba; font-family: 'Georgia', 'Yu Mincho', serif; height: 100vh; overflow: hidden; }
+
+        .top-nav-bar {
+            position: fixed; top: 12px; right: 12px; z-index: 10005;
+            display: flex; gap: 8px; align-items: center;
+        }
+        .nav-btn {
+            background: rgba(15, 15, 25, 0.88); border: 1.5px solid var(--gold);
+            color: var(--gold); padding: 8px 14px; border-radius: 20px;
+            font-size: 0.82rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.6); backdrop-filter: blur(6px);
+            transition: all 0.2s ease;
+        }
+        .nav-btn:hover { background: var(--gold); color: #000; transform: translateY(-1px); box-shadow: 0 6px 15px rgba(212, 175, 55, 0.4); }
+
+        #mode-select {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: radial-gradient(circle at center, rgba(35,18,55,0.95) 0%, rgba(5,4,10,1) 100%);
+            display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10000;
+        }
+        .title-logo { text-align: center; margin-bottom: 25px; }
+        .title-pentacle { font-size: 2.8rem; color: var(--gold); text-shadow: var(--magical-glow); animation: rotatePentacle 20s linear infinite; }
+        @keyframes rotatePentacle { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .select-title { font-size: 2.6rem; color: var(--gold); text-shadow: var(--magical-glow); margin: 5px 0 0; letter-spacing: 3px; line-height: 1.1; }
+        .subtitle { font-size: 0.85rem; color: var(--mana-blue); letter-spacing: 5px; opacity: 0.9; margin-top: 6px; }
+
+        .mode-container { display: flex; flex-direction: column; gap: 12px; }
+        .mode-btn {
+            width: 300px; padding: 14px 18px;
+            background: rgba(18, 18, 30, 0.85); border: 2px solid var(--gold); color: var(--gold);
+            font-size: 1.05rem; border-radius: 12px; cursor: pointer; transition: all 0.25s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.6); display: flex; flex-direction: column; align-items: center;
+        }
+        .mode-btn:hover { background: var(--gold); color: #000; transform: translateY(-3px); box-shadow: 0 6px 20px rgba(212, 175, 55, 0.5); }
+        .mode-btn .desc { font-size: 0.75rem; opacity: 0.85; margin-top: 4px; font-family: sans-serif; }
+        
+        .volume-control-box {
+            margin-top: 18px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            background: rgba(15, 15, 25, 0.78);
+            padding: 10px 22px;
+            border-radius: 20px;
+            border: 1px solid rgba(212, 175, 55, 0.4);
+            backdrop-filter: blur(6px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        .volume-label {
+            font-size: 0.78rem;
+            color: var(--gold);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: sans-serif;
+            font-weight: bold;
+        }
+        .volume-slider {
+            -webkit-appearance: none;
+            width: 180px;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.2);
+            outline: none;
+            cursor: pointer;
+        }
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--gold);
+            box-shadow: var(--magical-glow);
+            cursor: pointer;
+            transition: transform 0.15s ease;
+        }
+        .volume-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.25);
+        }
+
+        .title-footer-note { font-size: 0.72rem; color: rgba(255,255,255,0.4); margin-top: 18px; font-family: sans-serif; }
+
+        #table {
+            height: 100vh; width: 100vw; display: none; flex-direction: column; justify-content: space-between;
+            background: radial-gradient(circle at center, rgba(15, 30, 22, 0.95) 0%, rgba(4,6,10,0.98) 100%);
+            position: relative; overflow: hidden; padding: 10px 0;
+        }
+
+        #log-container { 
+            position: absolute; left: 12px; top: 12px; width: 230px; height: 110px; 
+            background: rgba(0, 0, 0, 0.82); border-left: 3px solid var(--gold); 
+            z-index: 2000; padding: 8px; font-size: 0.72rem; font-family: sans-serif;
+            display: flex; flex-direction: column-reverse; pointer-events: none; 
+            overflow: hidden; border-radius: 0 8px 8px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+        }
+        .log-entry { margin-bottom: 3px; border-bottom: 1px solid rgba(251, 246, 186, 0.1); line-height: 1.25; }
+        .log-player { color: #50e3c2; } .log-enemy { color: #ff5e62; } .log-system { color: #fff; font-weight: bold; background: rgba(212, 175, 55, 0.25); padding: 1px 3px; border-radius: 2px; }
+        
+        .hand-area { height: 18vh; display: flex; justify-content: center; align-items: center; gap: 8px; padding: 0 10px; z-index: 1000; }
+        .field-row { width: 100%; height: 26vh; display: flex; justify-content: center; align-items: center; gap: 12px; }
+        
+        .card { 
+            width: 76px; height: 110px; background: var(--card-bg); border: 2px solid var(--gold); 
+            border-radius: 8px; position: relative; transition: all 0.22s cubic-bezier(0.25, 0.8, 0.25, 1); 
+            flex-shrink: 0; box-shadow: 0 5px 12px rgba(0,0,0,0.7); overflow: hidden; cursor: pointer;
+        }
+        .card:hover { transform: translateY(-6px); box-shadow: 0 8px 20px rgba(212, 175, 55, 0.35); }
+        .card.summoning-sickness { filter: brightness(0.65) saturate(0.7); }
+        .card.used { transform: rotate(90deg) scale(0.85) !important; filter: brightness(0.4) grayscale(0.6); }
+        .card.selected { border-color: #50e3c2; box-shadow: 0 0 18px #50e3c2; transform: translateY(-12px); }
+        .card.targetable { border-color: #ff5e62; box-shadow: 0 0 18px #ff5e62; animation: pulse 0.9s infinite alternate; }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.06); }
+        }
+        
+        .card-cost {
+            position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; 
+            background: linear-gradient(135deg, #00c6ff, #0072ff); color: #fff; 
+            border-radius: 50%; font-size: 0.75rem; font-weight: bold; 
+            display: flex; justify-content: center; align-items: center; 
+            z-index: 10; border: 1px solid #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .card-img { 
+            width: 100%; height: 46%; 
+            display: flex; justify-content: center; align-items: center;
+            background: #1a1c26; border-bottom: 1px solid rgba(212, 175, 55, 0.4); 
+        }
+
+        .magic-circle {
+            width: 36px; height: 36px; border: 1.5px solid var(--gold); border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            color: var(--gold); font-size: 1.35rem; text-shadow: var(--magical-glow);
+        }
+        
+        .card-info { padding: 3px 2px; text-align: center; background: rgba(10,10,15,0.92); height: 54%; display: flex; flex-direction: column; justify-content: space-between; }
+        .card-name { font-size: 0.62rem; font-weight: bold; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .card-stats { display: flex; justify-content: space-around; margin-top: 2px; }
+        .stat-orb { width: 20px; height: 20px; border-radius: 50%; font-size: 0.65rem; font-weight: bold; display: flex; justify-content: center; align-items: center; border: 1px solid #fff; }
+        .atk-orb { background: linear-gradient(135deg, #ff416c, #ff4b2b); color: #fff; }
+        .hp-orb { background: linear-gradient(135deg, #11998e, #38ef7d); color: #fff; }
+        
+        .hud { 
+            position: absolute; left: 12px; width: 160px; background: rgba(10,12,20,0.88); 
+            padding: 8px 10px; border: 1px solid var(--gold); border-radius: 10px; z-index: 1500;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+        }
+        .enemy-hud { top: 130px; } 
+        .player-hud { bottom: calc(18vh + 12px); }
+        .hud-title { font-size: 0.72rem; font-weight: bold; display: flex; justify-content: space-between; margin-bottom: 4px; }
+        .hp-bar { width: 100%; height: 8px; background: #222; border-radius: 4px; overflow: hidden; border: 1px solid rgba(255,255,255,0.2); }
+        .hp-fill { height: 100%; transition: width 0.4s ease; }
+        .mana-display { font-size: 0.65rem; color: var(--mana-blue); margin-top: 4px; font-family: sans-serif; font-weight: bold; }
+        
+        .center-controls {
+            position: absolute; right: 15px; top: 50%; transform: translateY(-50%);
+            display: flex; flex-direction: column; align-items: center; gap: 8px; z-index: 1000;
+        }
+        #turn-btn { 
+            background: linear-gradient(135deg, #3a1c71, #d76d77, #ffaf7b); color: #fff; 
+            border: 2px solid var(--gold); padding: 16px 14px; border-radius: 12px; 
+            font-weight: bold; cursor: pointer; min-width: 90px; text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5); font-size: 0.9rem; letter-spacing: 1px;
+            transition: all 0.2s ease;
+        }
+        #turn-btn:hover { transform: scale(1.05); }
+        #turn-btn.skip-mode { border-color: var(--mana-blue); background: linear-gradient(135deg, #005c97, #363795); box-shadow: 0 0 12px var(--mana-blue); }
+        
+        .mana-charge-target { border-color: var(--mana-blue) !important; transform: translateY(-8px); box-shadow: 0 0 15px var(--mana-blue) !important; }
+
+        #phase-display { 
+            font-size: 0.85rem; font-weight: bold; text-shadow: 0 2px 4px #000; letter-spacing: 1px;
+        }
+
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.85); display: none; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 20000; backdrop-filter: blur(6px);
+        }
+        .modal-box {
+            background: rgba(18, 18, 30, 0.95); border: 2px solid var(--gold);
+            padding: 25px 32px; border-radius: 15px; text-align: center;
+            box-shadow: 0 0 25px rgba(212, 175, 55, 0.4); max-width: 320px;
+        }
+        .modal-title { font-size: 1.1rem; color: var(--gold); margin-bottom: 20px; font-weight: bold; line-height: 1.4; }
+        .modal-buttons { display: flex; gap: 15px; justify-content: center; }
+        .modal-btn {
+            padding: 10px 22px; border-radius: 20px; font-weight: bold; cursor: pointer; transition: all 0.2s ease;
+        }
+        .modal-btn.confirm { background: var(--gold); color: #000; border: none; }
+        .modal-btn.cancel { background: transparent; color: var(--gold); border: 1px solid var(--gold); }
+        .modal-btn:hover { transform: scale(1.05); }
+
+        #result-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(5, 5, 10, 0.92); display: none;
+            flex-direction: column; justify-content: center; align-items: center;
+            z-index: 9999; backdrop-filter: blur(8px);
+        }
+        .result-title { font-size: 3.5rem; font-weight: bold; margin-bottom: 25px; letter-spacing: 3px; }
+        .win-text { color: var(--gold); text-shadow: var(--magical-glow); } 
+        .lose-text { color: var(--danger-red); text-shadow: 0 0 15px rgba(231, 76, 60, 0.6); }
+        .result-btn { 
+            margin-top: 15px; padding: 14px 35px; background: transparent; 
+            border: 2px solid var(--gold); color: var(--gold); border-radius: 30px; 
+            cursor: pointer; width: 240px; font-size: 1rem; font-weight: bold;
+            transition: all 0.25s ease;
+        }
+        .result-btn:hover { background: var(--gold); color: #000; box-shadow: var(--magical-glow); }
+        .result-btn.secondary { border-color: rgba(212,175,55,0.5); margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="top-nav-bar">
+    <button id="quit-to-title-btn" class="nav-btn" style="display: none;" onclick="showQuitConfirm()">
+        <span>🏠 タイトルへ</span>
+    </button>
+    <button id="audio-btn" class="nav-btn" onclick="toggleAudioMaster()">
+        <span id="audio-icon">🎵</span> <span id="audio-text">BGM: ON</span>
+    </button>
+</div>
+
+<div id="mode-select">
+    <div class="title-logo">
+        <div class="title-pentacle">⛤</div>
+        <h1 class="select-title">PENTACLE ORACLE</h1>
+        <div class="subtitle">TACTICAL AUDIO TCG</div>
+    </div>
+    <div class="mode-container">
+        <button class="mode-btn" onclick="startGame(1)">
+            <span>Level 1 (初級)</span>
+            <span class="desc">HP: 15 / 基本ルール練習用AI</span>
+        </button>
+        <button class="mode-btn" onclick="startGame(2)">
+            <span>Level 2 (中級)</span>
+            <span class="desc">HP: 30 / 盤面重視・戦術的AI</span>
+        </button>
+        <button class="mode-btn" onclick="startGame(3)">
+            <span>Level 3 (上級)</span>
+            <span class="desc">HP: 50 / リーサル計算・最適化AI</span>
+        </button>
+    </div>
+
+    <div class="volume-control-box">
+        <div class="volume-label">
+            <span>🎵 BGM 音量:</span>
+            <span id="volume-val-text">70%</span>
+        </div>
+        <input type="range" class="volume-slider" id="bgm-volume-slider" min="0" max="100" value="70" oninput="changeBGMVolume(this.value)">
+    </div>
+
+    <div class="title-footer-note">※ 画面をタップするとBGM/SFXサウンドが開始されます</div>
+</div>
+
+<div id="table">
+    <div id="log-container"></div>
+    
+    <!-- 敵側エリア -->
+    <div class="hud enemy-hud">
+        <div class="hud-title" style="color:var(--danger-red);">
+            <span>ENEMY</span><span id="e-hp-num">30</span>
+        </div>
+        <div class="hp-bar"><div id="e-hp-fill" class="hp-fill" style="background:var(--danger-red); width:100%;"></div></div>
+        <div class="mana-display">Mana: <span id="e-mana-val">0</span> / <span id="e-max-mana">0</span></div>
+    </div>
+    <div id="enemy-hand" class="hand-area" style="align-items: flex-start;"></div>
+    <div id="enemy-field" class="field-row"></div>
+    
+    <!-- 中央コントローラー -->
+    <div class="center-controls">
+        <div id="phase-display">PHASE: -</div>
+        <button id="turn-btn" onclick="handleNextButton()">SKIP</button>
+    </div>
+
+    <!-- プレイヤー側エリア -->
+    <div id="player-field" class="field-row"></div>
+    <div id="player-hand" class="hand-area"></div>
+    <div class="hud player-hud">
+        <div class="hud-title" style="color:var(--hp-green);">
+            <span>YOU</span><span id="p-hp-num">30</span>
+        </div>
+        <div class="hp-bar"><div id="p-hp-fill" class="hp-fill" style="background:var(--hp-green); width:100%;"></div></div>
+        <div class="mana-display">Mana: <span id="mana-val">0</span> / <span id="max-mana">0</span></div>
+    </div>
+</div>
+
+<div id="custom-confirm" class="modal-overlay">
+    <div class="modal-box">
+        <div class="modal-title">対戦を中断して<br>タイトル画面へ戻りますか？</div>
+        <div class="modal-buttons">
+            <button class="modal-btn confirm" onclick="confirmQuitToTitle(true)">はい</button>
+            <button class="modal-btn cancel" onclick="confirmQuitToTitle(false)">いいえ</button>
+        </div>
+    </div>
+</div>
+
+<div id="result-overlay">
+    <div id="result-text" class="result-title"></div>
+    <button class="result-btn" onclick="startGame(currentLevel)">再挑戦</button>
+    <button class="result-btn secondary" onclick="resetToMenu()">タイトルへ</button>
+</div>
+
+<script>
+    const monsterData = {
+        "スライム":     { cost: 1, atk: 1, hp: 3 },
+        "ゴブリン":     { cost: 1, atk: 2, hp: 1 },
+        "スケルトン":   { cost: 2, atk: 3, hp: 2 },
+        "オーク":       { cost: 3, atk: 4, hp: 4 },
+        "ミノタウロス": { cost: 4, atk: 5, hp: 6 },
+        "バハムート":   { cost: 6, atk: 9, hp: 8 }
+    };
+
+    let currentLevel = 1;
+    let pHP = 30, eHP = 30, initialEHP = 30;
+    let mana = 0, maxMana = 0, eMana = 0, eMaxMana = 0;
+    let isTurn = true, currentPhase = "MANA_CHARGE", gameOver = false;
+    let selectedCard = null;
+
+    let audioCtx = null;
+    let bgmGainNode = null;
+    let audioEnabled = true;
+    let bgmVolume = 0.7; // 初期音量 70%
+    let bgmTimer = null;
+    let bgmStep = 0;
+    let currentBGMMode = 'title'; // 'title' | 'battle' | 'none'
+
+    function initAudioContext() {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            bgmGainNode = audioCtx.createGain();
+            bgmGainNode.gain.setValueAtTime(bgmVolume, audioCtx.currentTime);
+            bgmGainNode.connect(audioCtx.destination);
+        }
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+    }
+
+    function changeBGMVolume(val) {
+        bgmVolume = parseFloat(val) / 100;
+        const textElem = document.getElementById('volume-val-text');
+        if (textElem) textElem.innerText = `${val}%`;
+        if (bgmGainNode && audioCtx) {
+            bgmGainNode.gain.setValueAtTime(bgmVolume, audioCtx.currentTime);
+        }
+    }
+
+    function toggleAudioMaster() {
+        initAudioContext();
+        audioEnabled = !audioEnabled;
+        document.getElementById('audio-icon').innerText = audioEnabled ? "🎵" : "🔇";
+        document.getElementById('audio-text').innerText = audioEnabled ? "BGM: ON" : "BGM: OFF";
+        if (audioEnabled) {
+            startBGM(currentBGMMode);
+        } else {
+            stopBGM();
+        }
+    }
+
+    function startBGM(mode = 'title') {
+        currentBGMMode = mode;
+        stopBGM();
+        if (!audioEnabled) return;
+        initAudioContext();
+        bgmStep = 0;
+
+        // タイトルBGM: BPM 90 (16分音符: ~166ms)
+        // バトルBGM:   BPM 138 (16分音符: ~108ms)
+        const intervalMs = (mode === 'title') ? 166 : 108;
+        bgmTimer = setInterval(playBGMStep, intervalMs);
+    }
+
+    function stopBGM() {
+        if (bgmTimer) {
+            clearInterval(bgmTimer);
+            bgmTimer = null;
+        }
+    }
+
+    function playBGMStep() {
+        if (!audioEnabled || !audioCtx) return;
+
+        if (currentBGMMode === 'title') {
+            /* --- 神秘的で幻想的な タイトルBGM --- */
+            // コード進行: Em -> C -> G -> D (ドリアン/魔法調アルペジオ)
+            const titleArp = [
+                164.81, 246.94, 329.63, 392.00, // Em (E3, B3, E4, G4)
+                130.81, 196.00, 261.63, 329.63, // C  (C3, G3, C4, E4)
+                196.00, 293.66, 392.00, 493.88, // G  (G3, D4, G4, B4)
+                146.83, 220.00, 293.66, 369.99  // D  (D3, A3, D4, F#4)
+            ];
+            const noteIndex = bgmStep % titleArp.length;
+            const freq = titleArp[noteIndex];
+
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+            gain.gain.setValueAtTime(0.018, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.0005, audioCtx.currentTime + 0.35);
+
+            osc.connect(gain); gain.connect(bgmGainNode || audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.36);
+
+            // 8ステップごとの低音神秘ドローン
+            if (bgmStep % 8 === 0) {
+                const baseFreq = titleArp[Math.floor((bgmStep % titleArp.length) / 4) * 4] / 2;
+                const bassOsc = audioCtx.createOscillator();
+                const bassGain = audioCtx.createGain();
+                bassOsc.type = 'triangle';
+                bassOsc.frequency.setValueAtTime(baseFreq, audioCtx.currentTime);
+
+                bassGain.gain.setValueAtTime(0.035, audioCtx.currentTime);
+                bassGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.2);
+
+                bassOsc.connect(bassGain); bassGain.connect(bgmGainNode || audioCtx.destination);
+                bassOsc.start(); bassOsc.stop(audioCtx.currentTime + 1.25);
+            }
+
+        } else if (currentBGMMode === 'battle') {
+            /* --- 緊迫感あふれる バトルBGM --- */
+            // コード進行: Am -> F -> C -> G
+            const battleArp = [
+                220.00, 329.63, 440.00, 523.25, // Am
+                174.61, 261.63, 349.23, 440.00, // F
+                130.81, 196.00, 261.63, 329.63, // C
+                196.00, 293.66, 392.00, 493.88  // G
+            ];
+            const noteIndex = bgmStep % battleArp.length;
+            const freq = battleArp[noteIndex];
+
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(1200, audioCtx.currentTime);
+
+            gain.gain.setValueAtTime(0.015, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.0008, audioCtx.currentTime + 0.14);
+
+            osc.connect(filter); filter.connect(gain); gain.connect(bgmGainNode || audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.15);
+
+            // 16ビート・疾走シンセベースライン
+            const baseFreq = battleArp[Math.floor((bgmStep % battleArp.length) / 4) * 4] / 2;
+            const bassOsc = audioCtx.createOscillator();
+            const bassGain = audioCtx.createGain();
+            bassOsc.type = (bgmStep % 2 === 0) ? 'square' : 'triangle';
+            bassOsc.frequency.setValueAtTime(baseFreq, audioCtx.currentTime);
+
+            bassGain.gain.setValueAtTime(0.025, audioCtx.currentTime);
+            bassGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.12);
+
+            bassOsc.connect(bassGain); bassGain.connect(bgmGainNode || audioCtx.destination);
+            bassOsc.start(); bassOsc.stop(audioCtx.currentTime + 0.13);
+
+            // 4拍毎のリズムスネア風ノイズ
+            if (bgmStep % 4 === 2) {
+                const bufferSize = audioCtx.sampleRate * 0.04;
+                const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+
+                const noise = audioCtx.createBufferSource();
+                noise.buffer = buffer;
+                const nGain = audioCtx.createGain();
+                nGain.gain.setValueAtTime(0.012, audioCtx.currentTime);
+                nGain.gain.linearRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
+                noise.connect(nGain); nGain.connect(bgmGainNode || audioCtx.destination);
+                noise.start(); noise.stop(audioCtx.currentTime + 0.04);
+            }
+        }
+
+        bgmStep++;
+    }
+
+    function playClickSound() {
+        if (!audioEnabled) return;
+        initAudioContext();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(440, audioCtx.currentTime + 0.06);
+        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.06);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.06);
+    }
+
+    function playManaSound() {
+        if (!audioEnabled) return;
+        initAudioContext();
+        [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime + i * 0.05);
+            gain.gain.setValueAtTime(0.05, audioCtx.currentTime + i * 0.05);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + i * 0.05 + 0.2);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(audioCtx.currentTime + i * 0.05); osc.stop(audioCtx.currentTime + i * 0.05 + 0.2);
+        });
+    }
+
+    function playSummonSound() {
+        if (!audioEnabled) return;
+        initAudioContext();
+        const subOsc = audioCtx.createOscillator();
+        const subGain = audioCtx.createGain();
+        subOsc.type = 'triangle';
+        subOsc.frequency.setValueAtTime(150, audioCtx.currentTime);
+        subOsc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.3);
+        subGain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+        subGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+        subOsc.connect(subGain); subGain.connect(audioCtx.destination);
+        subOsc.start(); subOsc.stop(audioCtx.currentTime + 0.3);
+
+        [329.63, 440.00, 554.37, 659.25].forEach((f, i) => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(f, audioCtx.currentTime + i * 0.04);
+            gain.gain.setValueAtTime(0.04, audioCtx.currentTime + i * 0.04);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + i * 0.04 + 0.25);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(audioCtx.currentTime + i * 0.04); osc.stop(audioCtx.currentTime + i * 0.04 + 0.25);
+        });
+    }
+
+    function playDamageSound() {
+        if (!audioEnabled) return;
+        initAudioContext();
+        const bufferSize = audioCtx.sampleRate * 0.15;
+        const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+
+        const noise = audioCtx.createBufferSource();
+        noise.buffer = buffer;
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(800, audioCtx.currentTime);
+        filter.frequency.linearRampToValueAtTime(100, audioCtx.currentTime + 0.15);
+
+        const gain = audioCtx.createGain();
+        gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+
+        noise.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination);
+        noise.start(); noise.stop(audioCtx.currentTime + 0.15);
+    }
+
+    function playResultSound(isWin) {
+        if (!audioEnabled) return;
+        initAudioContext();
+        const freqs = isWin ? [523.25, 659.25, 783.99, 1046.50] : [196.00, 185.00, 174.61, 130.81];
+        freqs.forEach((f, i) => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = isWin ? 'triangle' : 'sawtooth';
+            osc.frequency.setValueAtTime(f, audioCtx.currentTime + i * 0.14);
+            gain.gain.setValueAtTime(0.08, audioCtx.currentTime + i * 0.14);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + i * 0.14 + 0.4);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(audioCtx.currentTime + i * 0.14); osc.stop(audioCtx.currentTime + i * 0.14 + 0.45);
+        });
+    }
+
+    window.addEventListener('click', () => {
+        initAudioContext();
+        if (currentBGMMode === 'title' && !bgmTimer && audioEnabled) {
+            startBGM('title');
+        }
+    }, { once: true });
+
+    function startGame(lv) {
+        initAudioContext();
+        playClickSound();
+        startBGM('battle'); // 対戦用BGM開始
+
+        currentLevel = lv;
+        gameOver = false; 
+        pHP = 30;
+        initialEHP = (lv === 1) ? 15 : (lv === 2) ? 30 : 50;
+        eHP = initialEHP; 
+        
+        mana = 0; maxMana = 0; 
+        eMana = 0; eMaxMana = 0;
+        isTurn = true;
+        selectedCard = null;
+
+        document.getElementById('mode-select').style.display = 'none';
+        document.getElementById('table').style.display = 'flex';
+        document.getElementById('table').style.filter = "none";
+        document.getElementById('result-overlay').style.display = 'none';
+        document.getElementById('quit-to-title-btn').style.display = 'flex';
+        
+        document.getElementById('player-hand').innerHTML = '';
+        document.getElementById('enemy-hand').innerHTML = '';
+        document.getElementById('player-field').innerHTML = '';
+        document.getElementById('enemy-field').innerHTML = '';
+        document.getElementById('log-container').innerHTML = '';
+
+        for(let i = 0; i < 3; i++) { 
+            drawCard('player-hand', true); 
+            drawCard('enemy-hand', false); 
+        }
+
+        addLog(`Level ${lv} 対戦開始！`, "system");
+        startPlayerTurn();
+    }
+
+    function showQuitConfirm() {
+        playClickSound();
+        document.getElementById('custom-confirm').style.display = 'flex';
+    }
+
+    function confirmQuitToTitle(choice) {
+        playClickSound();
+        document.getElementById('custom-confirm').style.display = 'none';
+        if (choice) {
+            resetToMenu();
+        }
+    }
+
+    function resetToMenu() { 
+        document.getElementById('table').style.display = 'none';
+        document.getElementById('result-overlay').style.display = 'none';
+        document.getElementById('quit-to-title-btn').style.display = 'none';
+        document.getElementById('custom-confirm').style.display = 'none';
+        document.getElementById('mode-select').style.display = 'flex';
+        startBGM('title'); // タイトル用BGMへ復帰
+    }
+
+    function startPlayerTurn() {
+        isTurn = true;
+        maxMana = Math.min(maxMana + 1, 10);
+        mana = maxMana;
+        
+        document.querySelectorAll('#player-field .card').forEach(c => {
+            c.classList.remove('used');
+            c.classList.remove('summoning-sickness');
+        });
+
+        drawCard('player-hand', true);
+        setPhase("MANA_CHARGE");
+        updateUI();
+    }
+
+    function setPhase(phase) {
+        currentPhase = phase;
+        const btn = document.getElementById('turn-btn');
+        const display = document.getElementById('phase-display');
+        clearSelection();
+        
+        if (phase === "MANA_CHARGE") {
+            btn.innerText = "SKIP";
+            btn.className = "skip-mode";
+            display.innerText = "PHASE: MANA";
+            display.style.color = "var(--mana-blue)";
+            addLog("マナ補充フェイズ", "system");
+        } else {
+            btn.innerText = "END";
+            btn.className = "";
+            display.innerText = "PHASE: MAIN";
+            display.style.color = "var(--gold)";
+            addLog("メインフェイズ", "system");
+        }
+        
+        document.querySelectorAll('#player-hand .card').forEach(c => {
+            phase === "MANA_CHARGE" ? c.classList.add('mana-charge-target') : c.classList.remove('mana-charge-target');
+        });
+    }
+
+    function handleNextButton() {
+        if (!isTurn || gameOver) return;
+        playClickSound();
+        if (currentPhase === "MANA_CHARGE") {
+            addLog("マナチャージをスキップ", "player");
+            setPhase("MAIN");
+        } else {
+            startEnemyTurn();
+        }
+    }
+
+    function handleCardClick(cardElem) {
+        if (!isTurn || gameOver) return;
+        const parentId = cardElem.parentElement.id;
+
+        if (currentPhase === "MANA_CHARGE") {
+            if (parentId === 'player-hand') {
+                playManaSound();
+                maxMana = Math.min(maxMana + 1, 10);
+                mana = maxMana;
+                addLog(`手札をマナへ捧げた (最大マナ: ${maxMana})`, "player");
+                cardElem.remove();
+                updateUI();
+                setPhase("MAIN");
+            }
+            return;
+        }
+
+        if (parentId === 'player-hand') {
+            const name = cardElem.dataset.name;
+            const data = monsterData[name];
+            if (mana >= data.cost) {
+                if (document.getElementById('player-field').children.length >= 5) {
+                    addLog("場のカードが満杯です", "system");
+                    return;
+                }
+                playSummonSound();
+                mana -= data.cost;
+                document.getElementById('player-field').appendChild(cardElem);
+                cardElem.classList.add('summoning-sickness');
+                addLog(`${name} を召喚 (コスト:${data.cost})`, "player");
+                updateUI();
+            } else {
+                addLog("マナが不足しています", "system");
+            }
+        } else if (parentId === 'player-field') {
+            if (cardElem.classList.contains('used') || cardElem.classList.contains('summoning-sickness')) {
+                addLog("このカードは今ターン攻撃できません", "system");
+                return;
+            }
+            if (selectedCard === cardElem) {
+                clearSelection();
+            } else {
+                selectCardForAttack(cardElem);
+            }
+        } else if (parentId === 'enemy-field') {
+            if (selectedCard) {
+                executeAttack(selectedCard, cardElem);
+            }
+        }
+    }
+
+    function selectCardForAttack(cardElem) {
+        clearSelection();
+        selectedCard = cardElem;
+        selectedCard.classList.add('selected');
+        playClickSound();
+
+        const enemyCards = document.querySelectorAll('#enemy-field .card');
+        if (enemyCards.length > 0) {
+            enemyCards.forEach(c => c.classList.add('targetable'));
+            addLog("攻撃対象の敵ミニオンを選択してください", "system");
+        } else {
+            addLog("敵本体へのダイレクトアタックが可能！", "system");
+            executeDirectAttack(selectedCard);
+        }
+    }
+
+    function clearSelection() {
+        if (selectedCard) {
+            selectedCard.classList.remove('selected');
+            selectedCard = null;
+        }
+        document.querySelectorAll('#enemy-field .card').forEach(c => c.classList.remove('targetable'));
+    }
+
+    function executeAttack(attacker, defender) {
+        playDamageSound();
+        const atkVal = parseInt(attacker.dataset.atk);
+        const defAtkVal = parseInt(defender.dataset.atk);
+        
+        let atkHp = parseInt(attacker.dataset.hp) - defAtkVal;
+        let defHp = parseInt(defender.dataset.hp) - atkVal;
+
+        addLog(`${attacker.dataset.name} → ${defender.dataset.name} へ攻撃！`, "player");
+
+        attacker.dataset.hp = atkHp;
+        defender.dataset.hp = defHp;
+
+        attacker.querySelector('.hp-orb').innerText = atkHp;
+        defender.querySelector('.hp-orb').innerText = defHp;
+
+        attacker.classList.add('used');
+
+        if (defHp <= 0) {
+            defender.remove();
+            addLog(`敵の ${defender.dataset.name} を撃破！`, "player");
+        }
+        if (atkHp <= 0) {
+            attacker.remove();
+            addLog(`味方の ${attacker.dataset.name} が倒された！`, "player");
+        }
+
+        clearSelection();
+        updateUI();
+    }
+
+    function executeDirectAttack(attacker) {
+        playDamageSound();
+        const atkVal = parseInt(attacker.dataset.atk);
+        eHP = Math.max(0, eHP - atkVal);
+        attacker.classList.add('used');
+        addLog(`${attacker.dataset.name} のダイレクトアタック！ ${atkVal}ダメージ`, "player");
+        clearSelection();
+        updateUI();
+    }
+
+    async function startEnemyTurn() {
+        isTurn = false;
+        document.getElementById('turn-btn').innerText = "...";
+        clearSelection();
+
+        eMaxMana = Math.min(eMaxMana + 1, 10);
+        eMana = eMaxMana;
+        
+        document.querySelectorAll('#enemy-field .card').forEach(c => {
+            c.classList.remove('used');
+            c.classList.remove('summoning-sickness');
+        });
+
+        drawCard('enemy-hand', false);
+        updateUI();
+        addLog("敵のターン", "enemy");
+
+        await new Promise(r => setTimeout(r, 600));
+
+        if (currentLevel === 1) {
+            await enemyAI_Level1();
+        } else if (currentLevel === 2) {
+            await enemyAI_Level2();
+        } else {
+            await enemyAI_Level3();
+        }
+
+        if (!gameOver) {
+            startPlayerTurn();
+        }
+    }
+
+    async function enemyAI_Level1() {
+        const eHand = document.getElementById('enemy-hand');
+        if (eHand.children.length > 0 && Math.random() < 0.5) {
+            eHand.firstElementChild.remove();
+            eMaxMana = Math.min(eMaxMana + 1, 10);
+            eMana = eMaxMana;
+            addLog("敵がマナをチャージした", "enemy");
+            updateUI();
+            await new Promise(r => setTimeout(r, 500));
+        }
+
+        let cards = Array.from(eHand.children);
+        for (let card of cards) {
+            if (gameOver) return;
+            const name = card.dataset.name;
+            const cost = monsterData[name].cost;
+            if (eMana >= cost && document.getElementById('enemy-field').children.length < 5) {
+                playSummonSound();
+                eMana -= cost;
+                card.remove();
+                const newCard = createCard(name, true, false);
+                newCard.classList.add('summoning-sickness');
+                document.getElementById('enemy-field').appendChild(newCard);
+                addLog(`敵が ${name} を召喚`, "enemy");
+                updateUI();
+                await new Promise(r => setTimeout(r, 600));
+            }
+        }
+
+        const attackers = Array.from(document.querySelectorAll('#enemy-field .card:not(.used):not(.summoning-sickness)'));
+        for (let attacker of attackers) {
+            if (gameOver) return;
+            playDamageSound();
+            const atk = parseInt(attacker.dataset.atk);
+            pHP = Math.max(0, pHP - atk);
+            attacker.classList.add('used');
+            addLog(`敵の ${attacker.dataset.name} がダイレクトアタック！ ${atk}ダメージ`, "enemy");
+            updateUI();
+            await new Promise(r => setTimeout(r, 600));
+        }
+    }
+
+    async function enemyAI_Level2() {
+        const eHand = document.getElementById('enemy-hand');
+        if (eMaxMana < 4 && eHand.children.length > 0) {
+            eHand.firstElementChild.remove();
+            eMaxMana = Math.min(eMaxMana + 1, 10);
+            eMana = eMaxMana;
+            addLog("敵がマナをチャージした", "enemy");
+            updateUI();
+            await new Promise(r => setTimeout(r, 500));
+        }
+
+        let handCards = Array.from(eHand.children).map(c => c.dataset.name)
+            .sort((a,b) => monsterData[b].cost - monsterData[a].cost);
+
+        for (let name of handCards) {
+            if (gameOver) return;
+            const cost = monsterData[name].cost;
+            if (eMana >= cost && document.getElementById('enemy-field').children.length < 5) {
+                playSummonSound();
+                eMana -= cost;
+                if (eHand.firstElementChild) eHand.firstElementChild.remove();
+                const newCard = createCard(name, true, false);
+                newCard.classList.add('summoning-sickness');
+                document.getElementById('enemy-field').appendChild(newCard);
+                addLog(`敵が ${name} を召喚`, "enemy");
+                updateUI();
+                await new Promise(r => setTimeout(r, 600));
+            }
+        }
+
+        const attackers = Array.from(document.querySelectorAll('#enemy-field .card:not(.used):not(.summoning-sickness)'));
+        for (let attacker of attackers) {
+            if (gameOver) return;
+            const playerField = Array.from(document.querySelectorAll('#player-field .card'));
+            let target = playerField.find(p => parseInt(p.dataset.hp) <= parseInt(attacker.dataset.atk) && parseInt(p.dataset.atk) < parseInt(attacker.dataset.hp));
+            
+            if (!target) target = playerField.find(p => parseInt(p.dataset.hp) <= parseInt(attacker.dataset.atk));
+
+            if (target) {
+                playDamageSound();
+                let atkVal = parseInt(attacker.dataset.atk);
+                let defVal = parseInt(target.dataset.atk);
+                let aHp = parseInt(attacker.dataset.hp) - defVal;
+                let tHp = parseInt(target.dataset.hp) - atkVal;
+
+                attacker.dataset.hp = aHp;
+                target.dataset.hp = tHp;
+                attacker.querySelector('.hp-orb').innerText = aHp;
+                target.querySelector('.hp-orb').innerText = tHp;
+                attacker.classList.add('used');
+
+                addLog(`敵の ${attacker.dataset.name} が ${target.dataset.name} に攻撃！`, "enemy");
+
+                if (tHp <= 0) target.remove();
+                if (aHp <= 0) attacker.remove();
+
+                updateUI();
+            } else {
+                playDamageSound();
+                const atk = parseInt(attacker.dataset.atk);
+                pHP = Math.max(0, pHP - atk);
+                attacker.classList.add('used');
+                addLog(`敵の ${attacker.dataset.name} がダイレクトアタック！ ${atk}ダメージ`, "enemy");
+                updateUI();
+            }
+            await new Promise(r => setTimeout(r, 600));
+        }
+    }
+
+    async function enemyAI_Level3() {
+        const eHand = document.getElementById('enemy-hand');
+        const attackers = Array.from(document.querySelectorAll('#enemy-field .card:not(.used):not(.summoning-sickness)'));
+        const totalAtk = attackers.reduce((sum, c) => sum + parseInt(c.dataset.atk), 0);
+        const playerField = Array.from(document.querySelectorAll('#player-field .card'));
+
+        if (playerField.length === 0 && totalAtk >= pHP) {
+            addLog("敵AIが勝利を確定（リーサル）！", "enemy");
+            for (let attacker of attackers) {
+                if (gameOver) return;
+                playDamageSound();
+                const atk = parseInt(attacker.dataset.atk);
+                pHP = Math.max(0, pHP - atk);
+                attacker.classList.add('used');
+                addLog(`敵の ${attacker.dataset.name} がフィニッシュブロー！ ${atk}ダメージ`, "enemy");
+                updateUI();
+                await new Promise(r => setTimeout(r, 500));
+            }
+            return;
+        }
+
+        if (eMaxMana < 6 && eHand.children.length > 1) {
+            eHand.firstElementChild.remove();
+            eMaxMana = Math.min(eMaxMana + 1, 10);
+            eMana = eMaxMana;
+            addLog("敵はマナ蓄積を優先した", "enemy");
+            updateUI();
+            await new Promise(r => setTimeout(r, 400));
+        }
+
+        let availableCards = Array.from(eHand.children).map(c => c.dataset.name);
+        availableCards.sort((a,b) => monsterData[b].cost - monsterData[a].cost);
+
+        for (let name of availableCards) {
+            if (gameOver) return;
+            const cost = monsterData[name].cost;
+            if (eMana >= cost && document.getElementById('enemy-field').children.length < 5) {
+                playSummonSound();
+                eMana -= cost;
+                if (eHand.firstElementChild) eHand.firstElementChild.remove();
+                const newCard = createCard(name, true, false);
+                newCard.classList.add('summoning-sickness');
+                document.getElementById('enemy-field').appendChild(newCard);
+                addLog(`敵が ${name} を戦略召喚`, "enemy");
+                updateUI();
+                await new Promise(r => setTimeout(r, 500));
+            }
+        }
+
+        const currentAttackers = Array.from(document.querySelectorAll('#enemy-field .card:not(.used):not(.summoning-sickness)'));
+        for (let attacker of currentAttackers) {
+            if (gameOver) return;
+            let currentPlayers = Array.from(document.querySelectorAll('#player-field .card'));
+
+            if (currentPlayers.length > 0) {
+                currentPlayers.sort((a,b) => parseInt(b.dataset.atk) - parseInt(a.dataset.atk));
+                let target = currentPlayers[0];
+
+                playDamageSound();
+                let atkVal = parseInt(attacker.dataset.atk);
+                let defVal = parseInt(target.dataset.atk);
+                let aHp = parseInt(attacker.dataset.hp) - defVal;
+                let tHp = parseInt(target.dataset.hp) - atkVal;
+
+                attacker.dataset.hp = aHp;
+                target.dataset.hp = tHp;
+                attacker.querySelector('.hp-orb').innerText = aHp;
+                target.querySelector('.hp-orb').innerText = tHp;
+                attacker.classList.add('used');
+
+                addLog(`敵の ${attacker.dataset.name} が ${target.dataset.name} を撃破へ`, "enemy");
+
+                if (tHp <= 0) target.remove();
+                if (aHp <= 0) attacker.remove();
+
+                updateUI();
+            } else {
+                playDamageSound();
+                const atk = parseInt(attacker.dataset.atk);
+                pHP = Math.max(0, pHP - atk);
+                attacker.classList.add('used');
+                addLog(`敵の ${attacker.dataset.name} がダイレクトアタック！ ${atk}ダメージ`, "enemy");
+                updateUI();
+            }
+            await new Promise(r => setTimeout(r, 500));
+        }
+    }
+
+    function createCard(name, isVisible, isPlayer = true) {
+        const card = document.createElement('div');
+        card.className = 'card';
+        const data = monsterData[name];
+
+        card.dataset.name = name;
+        card.dataset.cost = data.cost;
+        card.dataset.atk = data.atk;
+        card.dataset.hp = data.hp;
+
+        if (isVisible) {
+            card.innerHTML = `
+                <div class="card-cost">${data.cost}</div>
+                <div class="card-img"><div class="magic-circle"><span style="transform: translateY(-1px);">⛤</span></div></div>
+                <div class="card-info">
+                    <div class="card-name">${name}</div>
+                    <div class="card-stats">
+                        <div class="stat-orb atk-orb">${data.atk}</div>
+                        <div class="stat-orb hp-orb">${data.hp}</div>
+                    </div>
+                </div>`;
+            card.onclick = () => handleCardClick(card);
+        } else {
+            card.innerHTML = `
+                <div class="card-img" style="height:100%; border:none; background:#0c0d14;">
+                    <div class="magic-circle" style="width:46px; height:46px; font-size:1.8rem; color:#3a3d52; border-color:#3a3d52; text-shadow:none;">⛤</div>
+                </div>`;
+        }
+        return card;
+    }
+
+    function drawCard(targetId, isPlayer) {
+        const hand = document.getElementById(targetId);
+        if (hand.children.length < 6) {
+            const keys = Object.keys(monsterData);
+            const name = keys[Math.floor(Math.random() * keys.length)];
+            hand.appendChild(createCard(name, isPlayer, isPlayer));
+        }
+    }
+
+    function updateUI() {
+        document.getElementById('p-hp-num').innerText = pHP;
+        document.getElementById('e-hp-num').innerText = eHP;
+        document.getElementById('p-hp-fill').style.width = Math.max(0, (pHP / 30 * 100)) + "%";
+        document.getElementById('e-hp-fill').style.width = Math.max(0, (eHP / initialEHP * 100)) + "%";
+        
+        document.getElementById('mana-val').innerText = mana;
+        document.getElementById('max-mana').innerText = maxMana;
+        document.getElementById('e-mana-val').innerText = eMana;
+        document.getElementById('e-max-mana').innerText = eMaxMana;
+
+        if (!gameOver) {
+            if (eHP <= 0) showResult(true);
+            else if (pHP <= 0) showResult(false);
+        }
+    }
+
+    function addLog(msg, type) {
+        const log = document.getElementById('log-container');
+        const entry = document.createElement('div');
+        entry.className = `log-entry log-${type}`;
+        entry.innerText = msg;
+        log.insertBefore(entry, log.firstChild);
+    }
+
+    function showResult(isWin) {
+        gameOver = true;
+        stopBGM();
+        playResultSound(isWin);
+        document.getElementById('table').style.filter = "grayscale(0.8) brightness(0.4)";
+        document.getElementById('result-overlay').style.display = "flex";
+        document.getElementById('quit-to-title-btn').style.display = 'none';
+        
+        const titleElem = document.getElementById('result-text');
+        titleElem.innerText = isWin ? "VICTORY" : "DEFEATED";
+        titleElem.className = "result-title " + (isWin ? "win-text" : "lose-text");
+    }
+</script>
+</body>
+</html>
